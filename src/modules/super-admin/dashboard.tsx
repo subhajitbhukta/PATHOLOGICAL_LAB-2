@@ -67,6 +67,9 @@ export function SuperAdminDashboard() {
         subtitle="Live operational view of the entire LabNexus network — Central Lab Mumbai, Pune & Navi Mumbai."
         actions={
           <>
+            <Button size="sm" variant="outline" onClick={() => navigate("super-admin", "sa.kot-board")}>
+              <Activity className="h-3.5 w-3.5" /> KOT Board
+            </Button>
             <Button size="sm" variant="outline" onClick={() => navigate("super-admin", "sa.easy-reports")}>
               Easy Report Generator
             </Button>

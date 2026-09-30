@@ -15,6 +15,7 @@ import { PaymentsView, WalletView, LedgerView, Receivables, Settlement } from "@
 import { ProductsList, MaterialOrders, Warehouse, DispatchList, InventoryView, PurchaseOrders, GRN } from "@/modules/shared/Ecommerce";
 import { DoctorsList, CorporateList, HealthCamps, NotificationsEngine, SupportCenter, SystemSettings } from "@/modules/shared/NetworkSystem";
 import { MastersHub } from "@/modules/shared/MastersHub";
+import { LabKOTBoard } from "@/modules/shared/LabKOTBoard";
 import { PageHeader, SectionCard } from "@/components/common/Layout";
 import { Construction } from "lucide-react";
 
@@ -42,6 +43,8 @@ export function SuperAdminRouter({ page }: { page: string }) {
       return <OrderDetail portal="super-admin" />;
     case "sa.sample-tracking":
       return <SampleTracking />;
+    case "sa.kot-board":
+      return <LabKOTBoard />;
     case "sa.accession":
       return <SampleAccession />;
     case "sa.book-test":

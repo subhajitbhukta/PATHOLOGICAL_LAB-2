@@ -71,6 +71,7 @@ export const SUPER_ADMIN_NAV: NavSection[] = [
   {
     label: "Laboratory",
     items: [
+      { id: "sa.kot-board", label: "KOT Board", icon: Activity, badge: "48" },
       { id: "sa.accession", label: "Sample Accession", icon: QrCode },
       { id: "sa.worklist", label: "Daily Worklist", icon: ClipboardList },
       { id: "sa.processing", label: "Processing", icon: FlaskConical },
@@ -162,6 +163,7 @@ export const FRANCHISE_NAV: NavSection[] = [
       { id: "fr.patients", label: "Patients", icon: Users },
       { id: "fr.orders", label: "Orders", icon: ClipboardList },
       { id: "fr.samples", label: "Samples", icon: TestTube2 },
+      { id: "fr.kot-board", label: "KOT Board", icon: Activity, badge: "12" },
       { id: "fr.reports", label: "Reports", icon: FileText },
       { id: "fr.easy-reports", label: "Easy Report Generator", icon: FileText, badge: "8" },
     ],

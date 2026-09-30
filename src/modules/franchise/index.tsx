@@ -9,6 +9,7 @@ import { PatientsList, PatientRegistration } from "@/modules/shared/PatientsList
 import { SampleTracking } from "@/modules/shared/SampleTracking";
 import { ReportGenerator, PrintableReports } from "@/modules/shared/ReportGenerator";
 import { EasyReportGenerator } from "@/modules/shared/EasyReportGenerator";
+import { LabKOTBoard } from "@/modules/shared/LabKOTBoard";
 import { RatesMaster, CommissionEngine, SubFranchiseList, FranchisePerformance } from "@/modules/shared/Franchise";
 import { WalletView, LedgerView } from "@/modules/shared/Finance";
 import { ProductsList, MaterialOrders } from "@/modules/shared/Ecommerce";
@@ -41,6 +42,8 @@ export function FranchiseRouter({ page }: { page: string }) {
       return <OrderD portal="franchise" />;
     case "fr.samples":
       return <SampleTracking />;
+    case "fr.kot-board":
+      return <LabKOTBoard />;
     case "fr.reports":
       return <ReportGenerator />;
     case "fr.easy-reports":
