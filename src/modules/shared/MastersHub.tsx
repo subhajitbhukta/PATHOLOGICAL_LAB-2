@@ -18,8 +18,35 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { TEST_MASTER, SAMPLE_MASTER, PACKAGE_MASTER, RATE_MASTER } from "@/lib/mock-data";
+import { VIAL_REFERENCE } from "@/modules/shared/BookTestWizard";
 import { Plus, Search, Download, Beaker, TestTube2, Package2, Coins } from "lucide-react";
 import { useState } from "react";
+
+// Local VialSvg to avoid circular import runtime issues
+function VialSvgMini({ color, capColor, size = "sm" }: { color: string; capColor: string; size?: "sm" | "md" }) {
+  const h = size === "sm" ? 28 : 40;
+  const w = size === "sm" ? 14 : 18;
+  const isContainer = capColor === "—";
+  return (
+    <svg width={w} height={h} viewBox="0 0 18 40" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+      {isContainer ? (
+        <>
+          <rect x="2" y="8" width="14" height="28" rx="2" fill="white" stroke="#94a3b8" strokeWidth="1" />
+          <rect x="2" y="20" width="14" height="16" rx="2" fill={color} opacity="0.5" />
+          <rect x="2" y="8" width="14" height="3" fill="#64748b" />
+        </>
+      ) : (
+        <>
+          <rect x="3" y="6" width="12" height="3" rx="1" fill={capColor} stroke="#475569" strokeWidth="0.5" />
+          <rect x="6" y="3" width="6" height="3" fill="#94a3b8" />
+          <path d="M 4 9 L 14 9 L 14 36 Q 14 38 12 38 L 6 38 Q 4 38 4 36 Z" fill="white" stroke="#94a3b8" strokeWidth="0.5" />
+          <path d="M 4 9 L 14 9 L 14 36 Q 14 38 12 38 L 6 38 Q 4 38 4 36 Z" fill={color} opacity="0.55" />
+          <rect x="4" y="20" width="10" height="2" fill="white" opacity="0.5" />
+        </>
+      )}
+    </svg>
+  );
+}
 
 export function MastersHub() {
   return (
@@ -82,13 +109,22 @@ function TestMasterView() {
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Container / Vial">
+          <Field label="Vial / Container">
             <Select>
-              <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Select vial / container" /></SelectTrigger>
               <SelectContent>
-                {["Yellow (SST)", "Purple (EDTA)", "Grey (Fluoride)", "Light Blue (Citrate)", "Green (Heparin)", "Sterile Cup"].map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
+                {/* Blood — Vials with chemical additive */}
+                <SelectItem value="serum-sst">Vial — Clot Activator (SST) · Yellow cap</SelectItem>
+                <SelectItem value="edta">Vial — K2/K3 EDTA · Purple cap</SelectItem>
+                <SelectItem value="fluoride">Vial — Sodium Fluoride (NaF) · Grey cap</SelectItem>
+                <SelectItem value="citrate">Vial — Sodium Citrate 3.2% · Light Blue cap</SelectItem>
+                <SelectItem value="heparin">Vial — Lithium Heparin · Green cap</SelectItem>
+                <SelectItem value="plain">Vial — Plain (No Additive) · Red cap</SelectItem>
+                {/* Non-blood — Containers */}
+                <SelectItem value="urine-cup">Container — Sterile Cup (Urine)</SelectItem>
+                <SelectItem value="stool-cup">Container — Sterile Container (Stool)</SelectItem>
+                <SelectItem value="swab">Container — Swab / Transport Medium</SelectItem>
+                <SelectItem value="sputum">Container — Sputum Container</SelectItem>
               </SelectContent>
             </Select>
           </Field>
@@ -179,11 +215,63 @@ function TestMasterView() {
 function SampleMasterView() {
   return (
     <div className="space-y-4">
-      <SectionCard title="New Sample Type" description="Define sample, container, storage and rejection criteria">
+      {/* Vial / Container visual reference */}
+      <SectionCard
+        title="Vial & Container Reference"
+        description="Blood samples use colour-coded Vials (Vacutainers) with chemical additives · Stool/Urine/etc. use sterile Containers"
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          {VIAL_REFERENCE.map((v) => (
+            <div key={v.sample} className="rounded-lg border p-3 flex flex-col items-center text-center">
+              <VialSvgMini color={v.fluidColor} capColor={v.capColor} size="md" />
+              <div className="mt-2 text-xs font-medium">{v.sample}</div>
+              <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{v.additive}</div>
+              {v.capColor !== "—" && (
+                <Badge variant="outline" className="text-[9px] mt-1">{v.capColor} cap</Badge>
+              )}
+              <div className="text-[9px] text-muted-foreground mt-1">
+                {v.category === "blood" ? "Vial" : "Container"}
+              </div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="New Sample Type" description="Define sample, vial/container, storage and rejection criteria">
         <FormGrid cols={3}>
-          <Field label="Sample Type" required><Input placeholder="Serum" /></Field>
-          <Field label="Container" required><Input placeholder="Yellow (SST)" /></Field>
-          <Field label="Color"><Input placeholder="#facc15" /></Field>
+          <Field label="Sample Type" required><Input placeholder="Serum / EDTA / Urine..." /></Field>
+          <Field label="Sample Category" required>
+            <Select defaultValue="blood">
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="blood">Blood (Vial)</SelectItem>
+                <SelectItem value="urine">Urine (Container)</SelectItem>
+                <SelectItem value="stool">Stool (Container)</SelectItem>
+                <SelectItem value="swab">Swab</SelectItem>
+                <SelectItem value="sputum">Sputum</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Vial / Container" required>
+            <Select>
+              <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="serum-sst">Vial — Clot Activator (SST) · Yellow</SelectItem>
+                <SelectItem value="edta">Vial — K2/K3 EDTA · Purple</SelectItem>
+                <SelectItem value="fluoride">Vial — Sodium Fluoride (NaF) · Grey</SelectItem>
+                <SelectItem value="citrate">Vial — Sodium Citrate 3.2% · Light Blue</SelectItem>
+                <SelectItem value="heparin">Vial — Lithium Heparin · Green</SelectItem>
+                <SelectItem value="plain">Vial — Plain · Red</SelectItem>
+                <SelectItem value="urine-cup">Container — Sterile Cup (Urine)</SelectItem>
+                <SelectItem value="stool-cup">Container — Sterile Container (Stool)</SelectItem>
+                <SelectItem value="swab">Container — Swab / Transport Medium</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Additive / Preservative"><Input placeholder="K2 EDTA / NaF / Sodium Citrate..." /></Field>
+          <Field label="Cap Colour"><Input placeholder="Purple / Yellow / Grey..." /></Field>
+          <Field label="Fluid / Sample Colour"><Input placeholder="#a855f7" /></Field>
           <Field label="Minimum Volume" required><Input placeholder="2 mL" /></Field>
           <Field label="Maximum Volume"><Input placeholder="5 mL" /></Field>
           <Field label="Storage Condition"><Input placeholder="2-8°C" /></Field>
@@ -199,8 +287,8 @@ function SampleMasterView() {
             <TableHeader>
               <TableRow>
                 <TableHead>Sample</TableHead>
-                <TableHead>Container</TableHead>
-                <TableHead>Color</TableHead>
+                <TableHead>Vial / Container</TableHead>
+                <TableHead>Visual</TableHead>
                 <TableHead>Min/Max Vol</TableHead>
                 <TableHead>Storage</TableHead>
                 <TableHead>Stability</TableHead>
@@ -208,22 +296,32 @@ function SampleMasterView() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {SAMPLE_MASTER.map((s) => (
-                <TableRow key={s.type}>
-                  <TableCell className="font-medium text-sm">{s.type}</TableCell>
-                  <TableCell className="text-xs">{s.container}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-3 w-3 rounded-full border" style={{ background: s.color }} />
-                      <span className="text-xs">{s.color}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-xs font-mono">{s.minVol} / {s.maxVol}</TableCell>
-                  <TableCell className="text-xs">{s.storage}</TableCell>
-                  <TableCell className="text-xs">{s.stability}</TableCell>
-                  <TableCell className="text-xs">{s.transport}</TableCell>
-                </TableRow>
-              ))}
+              {SAMPLE_MASTER.map((s) => {
+                // Map sample to vial ref
+                const ref = VIAL_REFERENCE.find((v) =>
+                  v.sample.toLowerCase().includes(s.type.toLowerCase()) ||
+                  s.type.toLowerCase().includes(v.sample.toLowerCase())
+                ) || VIAL_REFERENCE[0];
+                return (
+                  <TableRow key={s.type}>
+                    <TableCell className="font-medium text-sm">{s.type}</TableCell>
+                    <TableCell className="text-xs">
+                      <div className="font-medium">{s.container}</div>
+                      {ref && <div className="text-[10px] text-muted-foreground">{ref.additive}</div>}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <VialSvgMini color={s.color} capColor={ref.capColor} />
+                        <span className="text-[10px] text-muted-foreground font-mono">{s.color}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs font-mono">{s.minVol} / {s.maxVol}</TableCell>
+                    <TableCell className="text-xs">{s.storage}</TableCell>
+                    <TableCell className="text-xs">{s.stability}</TableCell>
+                    <TableCell className="text-xs">{s.transport}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </Card>

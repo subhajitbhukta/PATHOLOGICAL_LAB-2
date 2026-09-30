@@ -176,6 +176,7 @@ export const FRANCHISE_NAV: NavSection[] = [
     label: "Network",
     items: [
       { id: "fr.sub-franchise", label: "Sub-Franchise", icon: Network },
+      { id: "fr.pickup-request", label: "Pickup Requests", icon: Truck, badge: "2" },
       { id: "fr.logistics", label: "Logistics", icon: Truck },
       { id: "fr.material-store", label: "Material Store", icon: ShoppingBag },
       { id: "fr.rates", label: "Rates", icon: Coins },

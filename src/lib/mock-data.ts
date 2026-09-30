@@ -84,29 +84,29 @@ export const DEPARTMENT_VOLUME = [
 ];
 
 export const TEST_MASTER = [
-  { code: "CBC", name: "Complete Blood Count", dept: "Hematology", sample: "EDTA", container: "Purple", tat: "2h", mrp: 350, inhouse: true, active: true },
-  { code: "LIP", name: "Lipid Profile", dept: "Biochemistry", sample: "Serum", container: "Yellow", tat: "4h", mrp: 800, inhouse: true, active: true },
-  { code: "TSH", name: "Thyroid Stimulating Hormone", dept: "Hormones", sample: "Serum", container: "Yellow", tat: "6h", mrp: 650, inhouse: true, active: true },
-  { code: "HBA1", name: "HbA1c", dept: "Biochemistry", sample: "EDTA", container: "Purple", tat: "3h", mrp: 550, inhouse: true, active: true },
-  { code: "VITD", name: "Vitamin D Total", dept: "Immunology", sample: "Serum", container: "Yellow", tat: "8h", mrp: 1200, inhouse: false, active: true },
-  { code: "LFT", name: "Liver Function Test", dept: "Biochemistry", sample: "Serum", container: "Yellow", tat: "3h", mrp: 700, inhouse: true, active: true },
-  { code: "KFT", name: "Kidney Function Test", dept: "Biochemistry", sample: "Serum", container: "Yellow", tat: "3h", mrp: 700, inhouse: true, active: true },
-  { code: "URINE", name: "Urine Routine", dept: "Clinical Path.", sample: "Urine", container: "Sterile", tat: "2h", mrp: 150, inhouse: true, active: true },
-  { code: "T3", name: "Triiodothyronine", dept: "Hormones", sample: "Serum", container: "Yellow", tat: "6h", mrp: 450, inhouse: true, active: true },
-  { code: "T4", name: "Thyroxine", dept: "Hormones", sample: "Serum", container: "Yellow", tat: "6h", mrp: 450, inhouse: true, active: true },
-  { code: "GLU", name: "Fasting Blood Glucose", dept: "Biochemistry", sample: "Fluoride", container: "Grey", tat: "1h", mrp: 120, inhouse: true, active: true },
-  { code: "PSA", name: "Prostate Specific Ag", dept: "Immunology", sample: "Serum", container: "Yellow", tat: "8h", mrp: 800, inhouse: false, active: true },
+  { code: "CBC", name: "Complete Blood Count", dept: "Hematology", sample: "EDTA", container: "Vial — K2/K3 EDTA · Purple", tat: "2h", mrp: 350, inhouse: true, active: true },
+  { code: "LIP", name: "Lipid Profile", dept: "Biochemistry", sample: "Serum", container: "Vial — Clot Activator (SST) · Yellow", tat: "4h", mrp: 800, inhouse: true, active: true },
+  { code: "TSH", name: "Thyroid Stimulating Hormone", dept: "Hormones", sample: "Serum", container: "Vial — Clot Activator (SST) · Yellow", tat: "6h", mrp: 650, inhouse: true, active: true },
+  { code: "HBA1", name: "HbA1c", dept: "Biochemistry", sample: "EDTA", container: "Vial — K2/K3 EDTA · Purple", tat: "3h", mrp: 550, inhouse: true, active: true },
+  { code: "VITD", name: "Vitamin D Total", dept: "Immunology", sample: "Serum", container: "Vial — Clot Activator (SST) · Yellow", tat: "8h", mrp: 1200, inhouse: false, active: true },
+  { code: "LFT", name: "Liver Function Test", dept: "Biochemistry", sample: "Serum", container: "Vial — Clot Activator (SST) · Yellow", tat: "3h", mrp: 700, inhouse: true, active: true },
+  { code: "KFT", name: "Kidney Function Test", dept: "Biochemistry", sample: "Serum", container: "Vial — Clot Activator (SST) · Yellow", tat: "3h", mrp: 700, inhouse: true, active: true },
+  { code: "URINE", name: "Urine Routine", dept: "Clinical Path.", sample: "Urine", container: "Container — Sterile Cup", tat: "2h", mrp: 150, inhouse: true, active: true },
+  { code: "T3", name: "Triiodothyronine", dept: "Hormones", sample: "Serum", container: "Vial — Clot Activator (SST) · Yellow", tat: "6h", mrp: 450, inhouse: true, active: true },
+  { code: "T4", name: "Thyroxine", dept: "Hormones", sample: "Serum", container: "Vial — Clot Activator (SST) · Yellow", tat: "6h", mrp: 450, inhouse: true, active: true },
+  { code: "GLU", name: "Fasting Blood Glucose", dept: "Biochemistry", sample: "Sodium Fluoride", container: "Vial — Sodium Fluoride (NaF) · Grey", tat: "1h", mrp: 120, inhouse: true, active: true },
+  { code: "PSA", name: "Prostate Specific Ag", dept: "Immunology", sample: "Serum", container: "Vial — Clot Activator (SST) · Yellow", tat: "8h", mrp: 800, inhouse: false, active: true },
 ];
 
 export const SAMPLE_MASTER = [
-  { type: "Serum", container: "Yellow (SST)", color: "#facc15", minVol: "2 mL", maxVol: "5 mL", storage: "2-8°C", stability: "8h", transport: "2-8°C" },
-  { type: "EDTA", container: "Purple (K2/K3 EDTA)", color: "#a855f7", minVol: "2 mL", maxVol: "4 mL", storage: "RT", stability: "6h", transport: "RT" },
-  { type: "Fluoride", container: "Grey (NaF)", color: "#94a3b8", minVol: "2 mL", maxVol: "4 mL", storage: "RT", stability: "24h", transport: "RT" },
-  { type: "Citrate", container: "Light Blue", color: "#60a5fa", minVol: "3 mL", maxVol: "5 mL", storage: "RT", stability: "4h", transport: "RT" },
-  { type: "Urine", container: "Sterile Cup", color: "#fde68a", minVol: "10 mL", maxVol: "50 mL", storage: "RT", stability: "2h", transport: "2-8°C" },
-  { type: "Stool", container: "Sterile Container", color: "#a3a3a3", minVol: "5 g", maxVol: "20 g", storage: "2-8°C", stability: "2h", transport: "2-8°C" },
-  { type: "Plasma", container: "Green (Heparin)", color: "#22c55e", minVol: "2 mL", maxVol: "5 mL", storage: "2-8°C", stability: "4h", transport: "2-8°C" },
-  { type: "Whole Blood", container: "EDTA", color: "#7c3aed", minVol: "2 mL", maxVol: "4 mL", storage: "RT", stability: "6h", transport: "RT" },
+  { type: "Serum", container: "Vial — Clot Activator (SST) · Yellow cap", color: "#facc15", minVol: "2 mL", maxVol: "5 mL", storage: "2-8°C", stability: "8h", transport: "2-8°C" },
+  { type: "EDTA", container: "Vial — K2/K3 EDTA · Purple cap", color: "#a855f7", minVol: "2 mL", maxVol: "4 mL", storage: "RT", stability: "6h", transport: "RT" },
+  { type: "Sodium Fluoride", container: "Vial — Sodium Fluoride (NaF) · Grey cap", color: "#94a3b8", minVol: "2 mL", maxVol: "4 mL", storage: "RT", stability: "24h", transport: "RT" },
+  { type: "Citrate", container: "Vial — Sodium Citrate 3.2% · Light Blue cap", color: "#60a5fa", minVol: "3 mL", maxVol: "5 mL", storage: "RT", stability: "4h", transport: "RT" },
+  { type: "Urine", container: "Container — Sterile Cup (Urine)", color: "#fde68a", minVol: "10 mL", maxVol: "50 mL", storage: "RT", stability: "2h", transport: "2-8°C" },
+  { type: "Stool", container: "Container — Sterile Container (Stool)", color: "#a3a3a3", minVol: "5 g", maxVol: "20 g", storage: "2-8°C", stability: "2h", transport: "2-8°C" },
+  { type: "Heparin / Plasma", container: "Vial — Lithium Heparin · Green cap", color: "#22c55e", minVol: "2 mL", maxVol: "5 mL", storage: "2-8°C", stability: "4h", transport: "2-8°C" },
+  { type: "Whole Blood", container: "Vial — K2/K3 EDTA · Purple cap", color: "#7c3aed", minVol: "2 mL", maxVol: "4 mL", storage: "RT", stability: "6h", transport: "RT" },
 ];
 
 export const PACKAGE_MASTER = [

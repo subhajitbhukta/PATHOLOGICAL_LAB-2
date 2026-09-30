@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { PageHeader, SectionCard, FormGrid, Field, EmptyState } from "@/components/common/Layout";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { Card } from "@/components/ui/card";
@@ -8,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -25,10 +28,24 @@ import {
 
 export function ReportGenerator() {
   const { toast } = useToast();
+  const [withBackground, setWithBackground] = useState(true);
+  const [headerEditable, setHeaderEditable] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
+
   return (
     <div className="space-y-4">
-      <PageHeader title="Report Generator" subtitle="Generate diagnostic reports — patient, package, doctor-wise, corporate"
-        actions={<Button size="sm" onClick={() => toast({ title: "Report Generated", description: "RPT-2026-028841 • PDF + QR ready" })}><FileText className="h-3.5 w-3.5" /> Generate Report</Button>} />
+      <PageHeader title="Report Generator" subtitle="Generate diagnostic reports — with/without branded background · editable invoice sample"
+        actions={
+          <>
+            <Button size="sm" variant="outline" onClick={() => setShowInvoice((v) => !v)}>
+              <Receipt className="h-3.5 w-3.5" /> {showInvoice ? "Hide" : "Show"} Invoice Sample
+            </Button>
+            <Button size="sm" onClick={() => toast({ title: "Report Generated", description: "RPT-2026-028841 • PDF + QR ready" })}>
+              <FileText className="h-3.5 w-3.5" /> Generate Report
+            </Button>
+          </>
+        } />
+
       <SectionCard title="Report Configuration">
         <FormGrid cols={3}>
           <Field label="Report Type" required>
@@ -53,13 +70,14 @@ export function ReportGenerator() {
           </Field>
           <Field label="Order ID" required><Input defaultValue="ORD-20260930-00452" /></Field>
           <Field label="Template">
-            <Select defaultValue="default">
+            <Select defaultValue="thyrocare">
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="default">Default LabNexus</SelectItem>
-                <SelectItem value="minimal">Minimal</SelectItem>
+                <SelectItem value="minimal">Minimal (Plain)</SelectItem>
                 <SelectItem value="letterhead">Letterhead</SelectItem>
                 <SelectItem value="corporate">Corporate Branded</SelectItem>
+                <SelectItem value="thyrocare">Thyrocare-style (Branded)</SelectItem>
               </SelectContent>
             </Select>
           </Field>
@@ -82,25 +100,95 @@ export function ReportGenerator() {
             </Select>
           </Field>
         </FormGrid>
+
+        <Separator className="my-4" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <div className="text-sm font-medium">Branded Background</div>
+              <div className="text-xs text-muted-foreground">Show Thyrocare-style colored header band & footer strip (non-editable when locked)</div>
+            </div>
+            <Switch checked={withBackground} onCheckedChange={setWithBackground} />
+          </div>
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <div className="text-sm font-medium">Header Editable</div>
+              <div className="text-xs text-muted-foreground">Allow editing lab name, address, logo on report header</div>
+            </div>
+            <Switch checked={headerEditable} onCheckedChange={setHeaderEditable} />
+          </div>
+        </div>
       </SectionCard>
 
-      <DiagnosticReportView />
+      <DiagnosticReportView withBackground={withBackground} headerEditable={headerEditable} />
+
+      {showInvoice && <InvoiceSampleView />}
     </div>
   );
 }
 
-export function DiagnosticReportView({ forPrint }: { forPrint?: boolean }) {
+export function DiagnosticReportView({
+  forPrint,
+  withBackground = false,
+  headerEditable = false,
+}: {
+  forPrint?: boolean;
+  withBackground?: boolean;
+  headerEditable?: boolean;
+}) {
   return (
-    <div className="bg-white rounded-lg shadow-md border print-page" id="report-print">
+    <div
+      className={`bg-white rounded-lg shadow-md print-page relative overflow-hidden ${
+        withBackground ? "border-2 border-teal-600" : "border"
+      }`}
+      id="report-print"
+    >
+      {/* Branded background — Thyrocare-style top band */}
+      {withBackground && (
+        <>
+          {/* Top accent band */}
+          <div className="h-2 bg-gradient-to-r from-teal-600 via-emerald-500 to-teal-600" />
+          {/* Watermark */}
+          <div
+            className="absolute inset-0 pointer-events-none flex items-center justify-center"
+            style={{ opacity: 0.04 }}
+          >
+            <div className="text-[160px] font-black tracking-tighter text-teal-900 -rotate-12">
+              LabNexus
+            </div>
+          </div>
+          {/* Side strip */}
+          <div className="absolute left-0 top-2 bottom-0 w-1 bg-gradient-to-b from-teal-600 to-emerald-500" />
+        </>
+      )}
+
       {/* Header */}
-      <div className="flex items-start justify-between p-5 border-b">
+      <div className={`relative flex items-start justify-between p-5 border-b ${withBackground ? "bg-gradient-to-r from-teal-50 to-emerald-50" : ""}`}>
         <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">LN</div>
+          <div className={`h-12 w-12 rounded-lg flex items-center justify-center font-bold text-lg ${withBackground ? "bg-teal-700 text-white" : "bg-primary text-primary-foreground"}`}>
+            LN
+          </div>
           <div>
-            <h2 className="text-lg font-bold tracking-tight">{DIAGNOSTIC_REPORT.labName}</h2>
-            <p className="text-xs text-muted-foreground">{DIAGNOSTIC_REPORT.labAddress}</p>
-            <p className="text-xs text-muted-foreground">{DIAGNOSTIC_REPORT.labPhone} • {DIAGNOSTIC_REPORT.labEmail}</p>
-            <p className="text-xs font-medium mt-0.5 text-primary">{DIAGNOSTIC_REPORT.accreditation}</p>
+            {headerEditable ? (
+              <div className="space-y-1">
+                <Input defaultValue={DIAGNOSTIC_REPORT.labName} className="h-7 text-base font-bold p-1" />
+                <Input defaultValue={DIAGNOSTIC_REPORT.labAddress} className="h-6 text-xs p-1" />
+                <Input defaultValue={`${DIAGNOSTIC_REPORT.labPhone} • ${DIAGNOSTIC_REPORT.labEmail}`} className="h-6 text-xs p-1" />
+                <Input defaultValue={DIAGNOSTIC_REPORT.accreditation} className="h-6 text-xs p-1 font-medium text-primary" />
+              </div>
+            ) : (
+              <>
+                <h2 className="text-lg font-bold tracking-tight">{DIAGNOSTIC_REPORT.labName}</h2>
+                <p className="text-xs text-muted-foreground">{DIAGNOSTIC_REPORT.labAddress}</p>
+                <p className="text-xs text-muted-foreground">{DIAGNOSTIC_REPORT.labPhone} • {DIAGNOSTIC_REPORT.labEmail}</p>
+                <p className="text-xs font-medium mt-0.5 text-primary">{DIAGNOSTIC_REPORT.accreditation}</p>
+              </>
+            )}
+            {withBackground && (
+              <Badge className="mt-1.5 bg-teal-700 text-white border-teal-800 text-[10px]">
+                ✓ NABL Accredited · ISO 15189
+              </Badge>
+            )}
           </div>
         </div>
         <div className="text-right text-xs">
@@ -117,7 +205,7 @@ export function DiagnosticReportView({ forPrint }: { forPrint?: boolean }) {
       </div>
 
       {/* Patient info */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-5 border-b bg-muted/30">
+      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 p-5 border-b ${withBackground ? "bg-teal-50/40" : "bg-muted/30"}`}>
         <Info label="Patient Name" value={DIAGNOSTIC_REPORT.patientName} />
         <Info label="Patient ID" value={DIAGNOSTIC_REPORT.patientId} mono />
         <Info label="Age / Sex" value={`${DIAGNOSTIC_REPORT.age} / ${DIAGNOSTIC_REPORT.sex}`} />
@@ -177,7 +265,7 @@ export function DiagnosticReportView({ forPrint }: { forPrint?: boolean }) {
       </div>
 
       {/* Footer */}
-      <div className="p-5 border-t flex items-start justify-between gap-3">
+      <div className={`p-5 border-t flex items-start justify-between gap-3 ${withBackground ? "bg-gradient-to-r from-teal-50 to-emerald-50" : ""}`}>
         <div className="text-xs space-y-1 max-w-md">
           <div className="font-medium">Report Verification</div>
           <p className="text-muted-foreground">Scan the QR code above or visit labnexus.in/verify/{DIAGNOSTIC_REPORT.reportId} to verify this report.</p>
@@ -192,7 +280,156 @@ export function DiagnosticReportView({ forPrint }: { forPrint?: boolean }) {
           <div className="text-muted-foreground">Reg: {DIAGNOSTIC_REPORT.pathologist.reg}</div>
         </div>
       </div>
+
+      {/* Bottom branded strip */}
+      {withBackground && (
+        <div className="h-2 bg-gradient-to-r from-teal-600 via-emerald-500 to-teal-600" />
+      )}
     </div>
+  );
+}
+
+// ===== Invoice Sample with editable header =====
+export function InvoiceSampleView() {
+  const { toast } = useToast();
+  const [headerEditable, setHeaderEditable] = useState(true);
+
+  return (
+    <SectionCard
+      title="Sample Invoice (Editable Header)"
+      description="Toggle header editing to edit logo text, lab name, address, GST — same header used across all invoices"
+      actions={
+        <div className="flex items-center gap-2">
+          <Label className="text-xs flex items-center gap-1.5">
+            <Switch checked={headerEditable} onCheckedChange={setHeaderEditable} /> Edit Header
+          </Label>
+          <Button size="sm" variant="outline" onClick={() => toast({ title: "Invoice PDF Generated", description: "INV-2026-00452.pdf" })}>
+            <Printer className="h-3.5 w-3.5" /> Print Invoice
+          </Button>
+        </div>
+      }
+    >
+      <div className="bg-white rounded-lg border shadow-md overflow-hidden">
+        {/* Header — editable */}
+        <div className={`flex items-start justify-between p-5 border-b ${headerEditable ? "bg-amber-50/40 border-amber-200" : "bg-gradient-to-r from-teal-50 to-emerald-50"}`}>
+          <div className="flex items-center gap-3">
+            <div className="h-14 w-14 rounded-lg bg-teal-700 text-white flex items-center justify-center font-bold text-lg">
+              {headerEditable ? <Input defaultValue="LN" className="h-9 w-12 text-center text-sm p-1" /> : "LN"}
+            </div>
+            <div className="space-y-1">
+              {headerEditable ? (
+                <>
+                  <Input defaultValue="LabNexus Central Laboratory" className="h-8 text-base font-bold p-1.5" />
+                  <Input defaultValue="Plot 14, MIDC Andheri East, Mumbai 400093" className="h-7 text-xs p-1" />
+                  <Input defaultValue="+91-22-4002-8800 • billing@labnexus.in" className="h-7 text-xs p-1" />
+                  <div className="flex gap-2">
+                    <Input defaultValue="GST: 27AAACL1234M1Z5" className="h-6 text-[10px] font-mono p-1 w-44" />
+                    <Input defaultValue="PAN: AAACL1234M" className="h-6 text-[10px] font-mono p-1 w-36" />
+                  </div>
+                  <Input defaultValue="NABL — MC-1987" className="h-6 text-[10px] p-1 font-medium text-teal-700 w-32" />
+                </>
+              ) : (
+                <>
+                  <h2 className="text-lg font-bold tracking-tight">LabNexus Central Laboratory</h2>
+                  <p className="text-xs text-muted-foreground">Plot 14, MIDC Andheri East, Mumbai 400093</p>
+                  <p className="text-xs text-muted-foreground">+91-22-4002-8800 • billing@labnexus.in</p>
+                  <p className="text-[10px] font-mono text-muted-foreground">GST: 27AAACL1234M1Z5 • PAN: AAACL1234M</p>
+                  <p className="text-[10px] font-medium text-teal-700">NABL — MC-1987</p>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Tax Invoice</div>
+            <div className="text-xl font-bold tracking-tight">INV-2026-00452</div>
+            <div className="text-xs text-muted-foreground mt-1">Date: 2026-09-30</div>
+            <div className="text-xs text-muted-foreground">Due: 2026-10-15</div>
+          </div>
+        </div>
+
+        {/* Bill To / Ship To */}
+        <div className="grid grid-cols-2 gap-4 p-5 border-b">
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Bill To</div>
+            <div className="text-sm font-medium">Ramesh Patil</div>
+            <div className="text-xs text-muted-foreground">PAT-00001245</div>
+            <div className="text-xs text-muted-foreground">A-204, Sunrise Apartments, Andheri E</div>
+            <div className="text-xs text-muted-foreground">Mumbai 400093 · +91 98200 11223</div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Collection / Service</div>
+            <div className="text-sm font-medium">Home Collection</div>
+            <div className="text-xs text-muted-foreground">Order: ORD-20260930-00452</div>
+            <div className="text-xs text-muted-foreground">Phlebotomist: Sandeep Kumar (R-N3)</div>
+            <div className="text-xs text-muted-foreground">Collected: 2026-09-30 10:32 AM</div>
+          </div>
+        </div>
+
+        {/* Line items */}
+        <table className="w-full text-xs">
+          <thead className="bg-muted/40">
+            <tr className="text-left border-b">
+              <th className="py-2 px-4 font-medium">#</th>
+              <th className="py-2 px-4 font-medium">Test / Package</th>
+              <th className="py-2 px-4 font-medium">Sample Type</th>
+              <th className="py-2 px-4 font-medium">Vial</th>
+              <th className="py-2 px-4 font-medium text-right">Qty</th>
+              <th className="py-2 px-4 font-medium text-right">MRP</th>
+              <th className="py-2 px-4 font-medium text-right">Disc.</th>
+              <th className="py-2 px-4 font-medium text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ["1", "Complete Blood Count (CBC)", "EDTA Blood", "Vial — K2/K3 EDTA · Purple", "1", "350", "70", "280"],
+              ["2", "Lipid Profile", "Serum", "Vial — Clot Activator · Yellow", "1", "800", "160", "640"],
+              ["3", "Thyroid Stimulating Hormone (TSH)", "Serum", "Vial — Clot Activator · Yellow", "1", "650", "130", "520"],
+              ["4", "Home Collection Charge", "—", "—", "1", "0", "0", "0"],
+            ].map((r) => (
+              <tr key={r[0]} className="border-b">
+                <td className="py-2 px-4">{r[0]}</td>
+                <td className="py-2 px-4 font-medium">{r[1]}</td>
+                <td className="py-2 px-4 text-muted-foreground">{r[2]}</td>
+                <td className="py-2 px-4 text-muted-foreground">{r[3]}</td>
+                <td className="py-2 px-4 text-right">{r[4]}</td>
+                <td className="py-2 px-4 text-right">₹{r[5]}</td>
+                <td className="py-2 px-4 text-right text-rose-600">-₹{r[6]}</td>
+                <td className="py-2 px-4 text-right font-medium">₹{r[7]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Totals */}
+        <div className="flex justify-end p-5">
+          <div className="w-72 space-y-1.5 text-xs">
+            <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>₹1,950</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Discount</span><span className="text-rose-600">-₹360</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Collection Charge</span><span>₹0</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">GST (Healthcare — 0%)</span><span>₹0</span></div>
+            <Separator className="my-1" />
+            <div className="flex justify-between text-base font-bold"><span>Total</span><span>₹1,590</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Paid (Wallet)</span><span className="text-emerald-700 font-medium">₹1,590</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Balance Due</span><span>₹0</span></div>
+          </div>
+        </div>
+
+        {/* Payment mode */}
+        <div className="px-5 pb-5 text-xs">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Payment Mode</div>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-xs">Wallet</Badge>
+            <span className="text-muted-foreground">Ref: WTRX-08822 · 2026-09-30 10:32 AM</span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-3 border-t bg-muted/30 text-[10px] text-muted-foreground flex items-center justify-between">
+          <div>This is a computer-generated invoice and does not require a signature.</div>
+          <div>Thank you for choosing LabNexus!</div>
+        </div>
+      </div>
+    </SectionCard>
   );
 }
 
@@ -300,9 +537,11 @@ export function PrintableReports() {
         ))}
       </div>
 
-      <SectionCard title="Sample Diagnostic Report Preview" description="Live preview of the LabNexus diagnostic report">
-        <DiagnosticReportView />
+      <SectionCard title="Sample Diagnostic Report Preview (Branded — Thyrocare-style)" description="Toggle background & header edit switches to see plain vs branded layouts">
+        <DiagnosticReportView withBackground />
       </SectionCard>
+
+      <InvoiceSampleView />
     </div>
   );
 }

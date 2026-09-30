@@ -1,6 +1,7 @@
 "use client";
 
 import { FranchiseDashboard } from "./dashboard";
+import { FranchisePickupRequest } from "./pickup-request";
 import { OrdersList as Orders } from "@/modules/shared/OrdersList";
 import { OrderDetail as OrderD } from "@/modules/shared/OrderDetail";
 import { BookTestWizard } from "@/modules/shared/BookTestWizard";
@@ -49,6 +50,8 @@ export function FranchiseRouter({ page }: { page: string }) {
       return <LedgerView />;
     case "fr.sub-franchise":
       return <SubFranchiseList />;
+    case "fr.pickup-request":
+      return <FranchisePickupRequest />;
     case "fr.logistics":
       return <PickupManagement />;
     case "fr.material-store":

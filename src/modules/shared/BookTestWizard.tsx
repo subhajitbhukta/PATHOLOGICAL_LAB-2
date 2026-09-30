@@ -30,7 +30,68 @@ import { TEST_MASTER, PACKAGE_MASTER } from "@/lib/mock-data";
 import {
   Search, User, MapPin, TestTube2, CalendarClock, QrCode, IndianRupee, CheckCircle2,
   ChevronRight, ChevronLeft, Plus, X, Home, Building2, Tent, Users, ArrowRight,
+  ScanLine, Keyboard, Printer,
 } from "lucide-react";
+
+// ===== Vial / Container reference =====
+// For blood samples: use "Vial" with additive name + cap color
+// For stool / urine / others: use "Container"
+export const VIAL_REFERENCE = [
+  { sample: "Serum", additive: "Clot Activator (SST)", capColor: "Yellow", fluidColor: "#f59e0b", category: "blood" },
+  { sample: "EDTA", additive: "K2/K3 EDTA", capColor: "Purple", fluidColor: "#a855f7", category: "blood" },
+  { sample: "Sodium Fluoride", additive: "NaF / Potassium Oxalate", capColor: "Grey", fluidColor: "#94a3b8", category: "blood" },
+  { sample: "Citrate", additive: "Sodium Citrate (3.2%)", capColor: "Light Blue", fluidColor: "#60a5fa", category: "blood" },
+  { sample: "Heparin", additive: "Lithium Heparin", capColor: "Green", fluidColor: "#22c55e", category: "blood" },
+  { sample: "Urine", additive: "Sterile Container", capColor: "—", fluidColor: "#fde68a", category: "non-blood" },
+  { sample: "Stool", additive: "Sterile Container", capColor: "—", fluidColor: "#a3a3a3", category: "non-blood" },
+];
+
+const SAMPLE_ROWS = [
+  { sample: "Serum", additive: "Clot Activator (SST)", capColor: "Yellow", fluidColor: "#f59e0b", category: "blood", barcode: "8901234567890", tests: "TSH, LIP, LFT, KFT" },
+  { sample: "EDTA", additive: "K2/K3 EDTA", capColor: "Purple", fluidColor: "#a855f7", category: "blood", barcode: "8901234567891", tests: "CBC, HbA1c" },
+  { sample: "Sodium Fluoride", additive: "NaF / Potassium Oxalate", capColor: "Grey", fluidColor: "#94a3b8", category: "blood", barcode: "8901234567892", tests: "Fasting Glucose" },
+];
+
+// ===== Vial SVG visual =====
+function VialSvg({
+  color,
+  capColor,
+  label,
+  size = "md",
+}: {
+  color: string;
+  capColor: string;
+  label?: string;
+  size?: "sm" | "md";
+}) {
+  const h = size === "sm" ? 28 : 40;
+  const w = size === "sm" ? 14 : 18;
+  const isContainer = capColor === "—";
+  return (
+    <div className="flex flex-col items-center gap-0.5 shrink-0">
+      <svg width={w} height={h} viewBox="0 0 18 40" xmlns="http://www.w3.org/2000/svg">
+        {isContainer ? (
+          // Container (urine / stool)
+          <>
+            <rect x="2" y="8" width="14" height="28" rx="2" fill="white" stroke="#94a3b8" strokeWidth="1" />
+            <rect x="2" y="20" width="14" height="16" rx="2" fill={color} opacity="0.5" />
+            <rect x="2" y="8" width="14" height="3" fill="#64748b" />
+          </>
+        ) : (
+          // Vial (vacutainer)
+          <>
+            <rect x="3" y="6" width="12" height="3" rx="1" fill={capColor} stroke="#475569" strokeWidth="0.5" />
+            <rect x="6" y="3" width="6" height="3" fill="#94a3b8" />
+            <path d="M 4 9 L 14 9 L 14 36 Q 14 38 12 38 L 6 38 Q 4 38 4 36 Z" fill="white" stroke="#94a3b8" strokeWidth="0.5" />
+            <path d="M 4 9 L 14 9 L 14 36 Q 14 38 12 38 L 6 38 Q 4 38 4 36 Z" fill={color} opacity="0.55" />
+            <rect x="4" y="20" width="10" height="2" fill="white" opacity="0.5" />
+          </>
+        )}
+      </svg>
+      {label && size !== "sm" && <span className="text-[8px] text-muted-foreground">{label}</span>}
+    </div>
+  );
+}
 
 const STEPS = [
   { id: 1, label: "Customer", icon: User },
@@ -52,6 +113,8 @@ export function BookTestWizard({ portal }: { portal: string }) {
   const [selectedTests, setSelectedTests] = useState<string[]>(["CBC", "TSH"]);
   const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
   const [paymentMode, setPaymentMode] = useState("wallet");
+  const [barcodeMode, setBarcodeMode] = useState<"auto-generate" | "scan" | "manual" | "lab-assign">("auto-generate");
+  const sampleRows = SAMPLE_ROWS;
 
   const toggleTest = (code: string) => {
     setSelectedTests((s) => s.includes(code) ? s.filter((c) => c !== code) : [...s, code]);
@@ -469,40 +532,134 @@ export function BookTestWizard({ portal }: { portal: string }) {
 
           {/* Step 6: Sample/Barcode */}
           {step === 6 && (
-            <SectionCard title="Sample & Barcode">
-              <p className="text-xs text-muted-foreground mb-3">Barcodes are auto-generated based on selected tests and sample types. Verify before printing.</p>
+            <SectionCard title="Sample / Vial & Barcode">
+              {/* Barcode generation mode */}
+              <div className="mb-4">
+                <div className="text-xs font-medium mb-2">Barcode Assignment Mode</div>
+                <RadioGroup
+                  defaultValue="auto-generate"
+                  onValueChange={(v) => setBarcodeMode(v as any)}
+                  className="grid grid-cols-2 lg:grid-cols-4 gap-2"
+                >
+                  {[
+                    { id: "auto-generate", label: "Auto-generate", desc: "System creates barcodes now", icon: QrCode },
+                    { id: "scan", label: "Scan existing", desc: "Scan pre-printed vial barcode", icon: ScanLine },
+                    { id: "manual", label: "Manual entry", desc: "Type barcode manually", icon: Keyboard },
+                    { id: "lab-assign", label: "Assign by lab", desc: "Lab assigns at collection", icon: Building2 },
+                  ].map((m) => (
+                    <Label key={m.id} htmlFor={m.id} className="cursor-pointer">
+                      <div className={`rounded-lg border p-2.5 h-full ${barcodeMode === m.id ? "border-primary bg-accent/30" : ""}`}>
+                        <RadioGroupItem value={m.id} id={m.id} className="mb-1.5" />
+                        <m.icon className="h-4 w-4 mb-1 text-primary" />
+                        <div className="text-xs font-medium">{m.label}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{m.desc}</div>
+                      </div>
+                    </Label>
+                  ))}
+                </RadioGroup>
+              </div>
+
+              {barcodeMode === "scan" && (
+                <div className="mb-4 rounded-lg border border-primary/30 bg-accent/20 p-3 flex items-center gap-3">
+                  <ScanLine className="h-5 w-5 text-primary" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">Scan Vial Barcode</div>
+                    <div className="text-xs text-muted-foreground">Place cursor in field below and scan with USB / Bluetooth barcode scanner</div>
+                  </div>
+                  <Input placeholder="Scan barcode →" className="font-mono max-w-xs" autoFocus />
+                </div>
+              )}
+
+              {barcodeMode === "manual" && (
+                <div className="mb-4 rounded-lg border border-primary/30 bg-accent/20 p-3">
+                  <div className="text-sm font-medium mb-2">Enter Vial Barcodes Manually</div>
+                  <div className="space-y-2">
+                    {sampleRows.map((s, i) => (
+                      <div key={s.barcode} className="flex items-center gap-2">
+                        <span className="text-xs w-32 font-medium">{s.sample}</span>
+                        <Input
+                          placeholder="13-digit barcode"
+                          className="font-mono h-8 text-xs flex-1"
+                          defaultValue={s.barcode}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {barcodeMode === "lab-assign" && (
+                <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 flex items-center gap-3">
+                  <Building2 className="h-5 w-5 text-amber-700" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-amber-900">Barcodes will be assigned at sample collection time</div>
+                    <div className="text-xs text-amber-800">Vials will be labelled by phlebotomist at the time of collection. System will print a placeholder collection slip with test/sample types only.</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Sample / Vial list with fluid color reference */}
+              <div className="text-xs font-medium mb-2">Sample / Vial Allocation</div>
               <div className="space-y-2">
-                {[
-                  { sample: "SERUM", vial: "Yellow SST", barcode: "8901234567890", tests: "TSH, LIP, LFT, KFT" },
-                  { sample: "EDTA", vial: "Purple (K2 EDTA)", barcode: "8901234567891", tests: "CBC, HbA1c" },
-                  { sample: "FLUORIDE", vial: "Grey (NaF)", barcode: "8901234567892", tests: "Fasting Glucose" },
-                ].map((s) => (
+                {sampleRows.map((s) => (
                   <div key={s.barcode} className="rounded-lg border p-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <TestTube2 className="h-5 w-5 text-primary" />
+                      {/* Vial visual reference */}
+                      <VialSvg color={s.fluidColor} capColor={s.capColor} label={s.sample} />
                       <div className="min-w-0">
                         <div className="font-medium text-sm">{s.sample}</div>
-                        <div className="text-xs text-muted-foreground">{s.vial} • {s.tests}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {s.category === "blood" ? (
+                            <><span className="font-medium text-foreground/80">Vial</span> — {s.additive} <span className="text-[10px]">({s.capColor} cap)</span></>
+                          ) : (
+                            <><span className="font-medium text-foreground/80">Container</span> — {s.additive}</>
+                          )}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{s.tests}</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex flex-col items-center">
-                        <div className="h-8 w-32 bg-black rounded flex items-center gap-px px-1">
-                          {Array.from({ length: 24 }).map((_, i) => (
-                            <div
-                              key={i}
-                              style={{ width: `${1 + (i % 3)}px` }}
-                              className={i % 4 === 0 ? "bg-white h-full" : "bg-white h-full"}
-                            />
-                          ))}
+                      {barcodeMode !== "lab-assign" && (
+                        <div className="flex flex-col items-center">
+                          <div className="h-8 w-32 bg-black rounded flex items-center gap-px px-1">
+                            {Array.from({ length: 24 }).map((_, i) => (
+                              <div
+                                key={i}
+                                style={{ width: `${1 + (i % 3)}px` }}
+                                className="bg-white h-full"
+                              />
+                            ))}
+                          </div>
+                          <div className="text-[10px] font-mono mt-0.5">{s.barcode}</div>
                         </div>
-                        <div className="text-[10px] font-mono mt-0.5">{s.barcode}</div>
-                      </div>
-                      <Button size="sm" variant="outline">Print</Button>
+                      )}
+                      {barcodeMode === "lab-assign" && (
+                        <div className="text-[10px] text-amber-700 font-medium">Lab to assign</div>
+                      )}
+                      <Button size="sm" variant="outline">
+                        <Printer className="h-3 w-3" /> Print
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
+
+              {/* Vial reference legend */}
+              <div className="mt-3 rounded-lg border bg-muted/30 p-3">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2">Vial Reference Legend</div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {VIAL_REFERENCE.map((v) => (
+                    <div key={v.sample} className="flex items-center gap-2 text-xs">
+                      <VialSvg color={v.fluidColor} capColor={v.capColor} label="" size="sm" />
+                      <div>
+                        <div className="font-medium text-[11px]">{v.sample}</div>
+                        <div className="text-[10px] text-muted-foreground">{v.additive}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <Separator className="my-3" />
               <FormGrid cols={2}>
                 <Field label="Collection OTP (sent to patient)">
