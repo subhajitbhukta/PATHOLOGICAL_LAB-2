@@ -8,6 +8,7 @@ import { BookTestWizard } from "@/modules/shared/BookTestWizard";
 import { PatientsList, PatientRegistration } from "@/modules/shared/PatientsList";
 import { SampleTracking } from "@/modules/shared/SampleTracking";
 import { ReportGenerator, PrintableReports } from "@/modules/shared/ReportGenerator";
+import { EasyReportGenerator } from "@/modules/shared/EasyReportGenerator";
 import { RatesMaster, CommissionEngine, SubFranchiseList, FranchisePerformance } from "@/modules/shared/Franchise";
 import { WalletView, LedgerView } from "@/modules/shared/Finance";
 import { ProductsList, MaterialOrders } from "@/modules/shared/Ecommerce";
@@ -42,6 +43,8 @@ export function FranchiseRouter({ page }: { page: string }) {
       return <SampleTracking />;
     case "fr.reports":
       return <ReportGenerator />;
+    case "fr.easy-reports":
+      return <EasyReportGenerator />;
     case "fr.invoices":
       return <ComingSoon name="Invoices" />;
     case "fr.wallet":

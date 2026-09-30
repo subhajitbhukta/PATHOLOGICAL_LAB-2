@@ -6,8 +6,8 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { Timeline } from "@/components/common/Timeline";
 import { useAppStore } from "@/lib/store";
 import { ORDERS, SAMPLE_TIMELINE, DIAGNOSTIC_REPORT } from "@/lib/mock-data";
-import { DiagnosticReportView } from "@/modules/shared/ReportGenerator";
-import { BookTestWizard } from "@/modules/shared/BookTestWizard";
+import { DiagnosticReportView, InvoiceSampleView } from "@/modules/shared/ReportGenerator";
+import { SimpleBookTest } from "@/modules/patient/SimpleBookTest";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -190,8 +190,18 @@ function PatientReports() {
           </TableBody>
         </Table>
       </Card>
-      <SectionCard title="Latest Report Preview">
-        <DiagnosticReportView />
+      <SectionCard
+        title="Latest Report — LabNexus Branded (Thyrocare-style)"
+        description="All patient reports are generated with the branded header and background for authenticity"
+        actions={
+          <>
+            <Button size="sm" variant="outline"><Download className="h-3.5 w-3.5" /> Download PDF</Button>
+            <Button size="sm" variant="outline"><Share2 className="h-3.5 w-3.5" /> Share</Button>
+            <Button size="sm" variant="outline"><Mail className="h-3.5 w-3.5" /> Email</Button>
+          </>
+        }
+      >
+        <DiagnosticReportView withBackground headerEditable={false} />
       </SectionCard>
     </div>
   );
@@ -233,6 +243,63 @@ function PatientFamily() {
 
 import { Separator } from "@/components/ui/separator";
 
+function PatientInvoices() {
+  return (
+    <div className="space-y-4">
+      <PageHeader
+        title="My Invoices"
+        subtitle="All your past invoices — click to download or share"
+        actions={<Button size="sm" variant="outline"><Mail className="h-3.5 w-3.5" /> Email All</Button>}
+      />
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Invoice ID</TableHead>
+              <TableHead>Order ID</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead>Payment</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[
+              ["INV-2026-00452", "ORD-20260930-00452", "2026-09-30", "₹1,850", "Wallet", "Paid"],
+              ["INV-2026-00451", "ORD-20260929-00441", "2026-09-29", "₹3,499", "UPI", "Paid"],
+              ["INV-2026-00450", "ORD-20260928-00432", "2026-09-28", "₹1,100", "Card", "Paid"],
+              ["INV-2026-00449", "ORD-20260927-00421", "2026-09-27", "₹2,299", "UPI", "Paid"],
+              ["INV-2026-00448", "ORD-20260926-00412", "2026-09-26", "₹999", "Cash", "Paid"],
+            ].map((r) => (
+              <TableRow key={r[0]}>
+                <TableCell className="font-mono text-xs">{r[0]}</TableCell>
+                <TableCell className="font-mono text-xs">{r[1]}</TableCell>
+                <TableCell className="text-xs font-mono">{r[2]}</TableCell>
+                <TableCell className="text-right text-xs font-medium">{r[3]}</TableCell>
+                <TableCell><Badge variant="secondary" className="text-xs">{r[4]}</Badge></TableCell>
+                <TableCell><StatusBadge status={r[5]} /></TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="ghost"><Download className="h-3.5 w-3.5" /></Button>
+                    <Button size="sm" variant="ghost"><Share2 className="h-3.5 w-3.5" /></Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+      <SectionCard
+        title="Sample Invoice Preview"
+        description="The invoice below is editable — toggle Edit Header to change logo, lab name, GST etc."
+      >
+        <InvoiceSampleView />
+      </SectionCard>
+    </div>
+  );
+}
+
 function ComingSoon({ name }: { name: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -248,7 +315,7 @@ export function PatientRouter({ page }: { page: string }) {
     case "pt.dashboard":
       return <PatientDashboard />;
     case "pt.book-test":
-      return <BookTestWizard portal="patient" />;
+      return <SimpleBookTest />;
     case "pt.orders":
       return <PatientOrders />;
     case "pt.reports":
@@ -258,7 +325,7 @@ export function PatientRouter({ page }: { page: string }) {
     case "pt.appointments":
       return <ComingSoon name="Appointments" />;
     case "pt.invoices":
-      return <ComingSoon name="Invoices" />;
+      return <PatientInvoices />;
     case "pt.profile":
       return <ComingSoon name="Profile" />;
     case "pt.support":

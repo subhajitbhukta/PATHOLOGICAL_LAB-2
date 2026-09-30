@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import {
   ShoppingCart, Users, TestTube2, FileClock, FileCheck2, AlertTriangle,
-  IndianRupee, Wallet, Receipt, Plus, ChevronRight, UserPlus, Activity,
+  IndianRupee, Wallet, Receipt, Plus, ChevronRight, UserPlus, Activity, FileText,
 } from "lucide-react";
 
 const REVENUE_7D = [
@@ -36,6 +36,9 @@ export function FranchiseDashboard() {
         subtitle="FR-001 • Owner: Rajesh Shah • Gold Plan • Mumbai"
         actions={
           <>
+            <Button size="sm" variant="outline" onClick={() => navigate("franchise", "fr.easy-reports")}>
+              <FileText className="h-3.5 w-3.5" /> Easy Reports
+            </Button>
             <Button size="sm" variant="outline" onClick={() => navigate("franchise", "fr.wallet")}>
               <Wallet className="h-3.5 w-3.5" /> Wallet
             </Button>

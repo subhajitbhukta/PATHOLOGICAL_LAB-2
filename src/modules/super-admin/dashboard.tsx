@@ -67,6 +67,9 @@ export function SuperAdminDashboard() {
         subtitle="Live operational view of the entire LabNexus network — Central Lab Mumbai, Pune & Navi Mumbai."
         actions={
           <>
+            <Button size="sm" variant="outline" onClick={() => navigate("super-admin", "sa.easy-reports")}>
+              Easy Report Generator
+            </Button>
             <Button size="sm" variant="outline">Export Today</Button>
             <Button size="sm" onClick={() => navigate("super-admin", "sa.book-test")}>
               + Book New Test

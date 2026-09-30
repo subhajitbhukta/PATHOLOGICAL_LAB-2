@@ -83,6 +83,7 @@ export const SUPER_ADMIN_NAV: NavSection[] = [
   {
     label: "Reports",
     items: [
+      { id: "sa.easy-reports", label: "Easy Report Generator", icon: FileText, badge: "12" },
       { id: "sa.report-generator", label: "Report Generator", icon: FileText },
       { id: "sa.report-types", label: "Report Templates", icon: FileBarChart },
       { id: "sa.reports-center", label: "Reports Centre", icon: BarChart3 },
@@ -162,6 +163,7 @@ export const FRANCHISE_NAV: NavSection[] = [
       { id: "fr.orders", label: "Orders", icon: ClipboardList },
       { id: "fr.samples", label: "Samples", icon: TestTube2 },
       { id: "fr.reports", label: "Reports", icon: FileText },
+      { id: "fr.easy-reports", label: "Easy Report Generator", icon: FileText, badge: "8" },
     ],
   },
   {

@@ -8,6 +8,7 @@ import { PatientsList, PatientRegistration } from "@/modules/shared/PatientsList
 import { BookTestWizard } from "@/modules/shared/BookTestWizard";
 import { Worklist, Processing, ResultEntry, QC, RetestQueue } from "@/modules/shared/Laboratory";
 import { ReportGenerator, ReportTypes, ReportsCentre, PrintableReports } from "@/modules/shared/ReportGenerator";
+import { EasyReportGenerator } from "@/modules/shared/EasyReportGenerator";
 import { FranchiseList, SubFranchiseList, RatesMaster, CommissionEngine, FranchisePerformance, AuditTrail } from "@/modules/shared/Franchise";
 import { PickupManagement, RoutesManagement, DriversManagement, GPSTracking, SampleHandover, LogisticsSLA } from "@/modules/shared/Logistics";
 import { PaymentsView, WalletView, LedgerView, Receivables, Settlement } from "@/modules/shared/Finance";
@@ -59,6 +60,8 @@ export function SuperAdminRouter({ page }: { page: string }) {
       return <RetestQueue />;
     case "sa.pathologist":
       return <ComingSoon name="Pathologist Review Queue" />;
+    case "sa.easy-reports":
+      return <EasyReportGenerator />;
     case "sa.report-generator":
       return <ReportGenerator />;
     case "sa.report-types":
